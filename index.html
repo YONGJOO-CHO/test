@@ -58,6 +58,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .empty-msg{text-align:center;padding:40px;color:#999}
 .count-badge{font-size:13px;background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:10px;margin-left:8px}
 .hidden{display:none}
+.api-key-bar{display:flex;gap:8px;align-items:center;margin-bottom:16px;padding:12px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1);flex-wrap:wrap}
+.api-key-bar input{flex:1;min-width:200px;padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:14px;font-family:inherit}
+.api-key-bar label{font-weight:600;color:#6A1B9A;font-size:14px;white-space:nowrap}
+.ai-box{background:#f3e5f5;padding:20px;border-radius:8px;margin:16px 0;white-space:pre-wrap;line-height:1.7;font-size:16px;border-left:4px solid #6A1B9A}
+.ai-box .ai-label{font-weight:700;color:#6A1B9A;margin-bottom:8px}
+.btn-ai{background:#7B1FA2;color:#fff}
+.btn-ai:hover{background:#6A1B9A}
+.btn-ai:disabled{background:#ccc;cursor:not-allowed}
+.ai-loading{color:#999;font-style:italic}
 @media(max-width:768px){
 .layout{flex-direction:column}
 .filter-panel{width:100%;position:static}
@@ -74,6 +83,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <div class="tab" onclick="switchTab('manage')">문제 관리</div>
 </div>
 <div class="container">
+<div class="api-key-bar"><label>Gemini API Key</label><input type="password" id="api-key-input" placeholder="API 키를 입력하세요" oninput="saveApiKey(this.value)"><button class="btn btn-ai" onclick="toggleKeyVisibility()" id="key-toggle-btn" style="padding:8px 12px">표시</button></div>
 <div id="view-browse"></div>
 <div id="view-wrong" class="hidden"></div>
 <div id="view-manage" class="hidden"></div>
@@ -129,6 +139,8 @@ h+=`<div class="problem-text">${esc(q.text)}</div>`;
 h+=`<div class="form-group"><label>내 답안 메모</label><textarea class="memo-area" oninput="saveMemo('${q.id}',this.value)">${esc(q.memo)}</textarea></div>`;
 h+=`<button class="btn btn-green" onclick="toggleAnswer()" id="ans-toggle">정답·해설 보기 ▼</button>`;
 h+=`<div class="answer-box hidden" id="ans-box">${esc(q.answer)}</div>`;
+h+=`<button class="btn btn-ai" onclick="askGemini('${q.id}')" id="ai-btn">AI 해설 요청</button>`;
+h+=`<div id="ai-result"></div>`;
 h+=`<div class="score-btns"><button class="btn btn-green" onclick="setStatus('${q.id}','done')">✓ 완료 (정답)</button><button class="btn btn-orange" onclick="setStatus('${q.id}','retry')">△ 재풀기 필요</button><button class="btn btn-gray" onclick="setStatus('${q.id}','none')">○ 미풀이로 초기화</button></div>`;
 if(next)h+=`<button class="btn btn-green" onclick="solvingId='${next.id}';${solveFrom==='browse'?'renderBrowse()':'renderWrong()'}">다음 문제 →</button>`;
 h+=`</div>`;
@@ -179,7 +191,30 @@ function deleteQ(id){if(!confirm('정말 삭제하시겠습니까?'))return;data
 function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='biosci_exam_data.json';a.click();URL.revokeObjectURL(a.href)}
 function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d)){alert('잘못된 형식입니다.');return}d.forEach(q=>{if(!q.id)q.id=crypto.randomUUID();if(!q.status)q.status='none';if(!q.memo)q.memo=''});data=data.concat(d);save();renderManage();alert(d.length+'개 문제를 불러왔습니다.')}catch{alert('JSON 파싱 오류')}};r.readAsText(f)}
 
-load();renderBrowse();
+function getApiKey(){return localStorage.getItem('biosci_api_key')||''}
+function saveApiKey(v){localStorage.setItem('biosci_api_key',v)}
+function toggleKeyVisibility(){const inp=document.getElementById('api-key-input');const btn=document.getElementById('key-toggle-btn');if(inp.type==='password'){inp.type='text';btn.textContent='숨기기'}else{inp.type='password';btn.textContent='표시'}}
+async function askGemini(id){
+const key=getApiKey();
+if(!key){alert('Gemini API 키를 먼저 입력해주세요.');return}
+const q=getQ(id);if(!q)return;
+const btn=document.getElementById('ai-btn');const box=document.getElementById('ai-result');
+btn.disabled=true;btn.textContent='요청 중...';
+box.innerHTML='<div class="ai-loading">AI 해설을 생성하고 있습니다...</div>';
+const prompt=`당신은 생명과학 임용고시 전문 교사입니다. 다음 문제에 대해 상세한 해설을 작성해주세요.\n\n[문제]\n${q.text}\n\n다음을 포함하여 해설해주세요:\n1. 핵심 개념 정리\n2. 단계별 풀이 과정\n3. 정답 도출 근거\n4. 관련 개념 및 출제 포인트`;
+try{
+const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+if(!res.ok){const err=await res.text();throw new Error('API 오류 ('+res.status+'): '+err)}
+const d=await res.json();
+const text=d.candidates?.[0]?.content?.parts?.[0]?.text||'응답을 받지 못했습니다.';
+box.innerHTML='<div class="ai-box"><div class="ai-label">AI 해설</div>'+esc(text)+'</div>';
+}catch(e){box.innerHTML='<div class="ai-box" style="border-left-color:#c62828;background:#ffebee"><div class="ai-label" style="color:#c62828">오류</div>'+esc(e.message)+'</div>'}
+btn.disabled=false;btn.textContent='AI 해설 요청';
+}
+
+load();
+document.getElementById('api-key-input').value=getApiKey();
+renderBrowse();
 </script>
 </body>
 </html>
