@@ -7,36 +7,36 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F8F9FA;color:#333;font-size:16px;min-height:100vh}
-.tabs{display:flex;background:#fff;border-bottom:2px solid #2E7D32;position:sticky;top:0;z-index:100}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #6A1B9A;position:sticky;top:0;z-index:100}
 .tab{flex:1;padding:14px;text-align:center;cursor:pointer;font-weight:600;color:#666;transition:all .2s}
-.tab.active{color:#fff;background:#2E7D32}
-.tab:hover:not(.active){background:#e8f5e9}
+.tab.active{color:#fff;background:#6A1B9A}
+.tab:hover:not(.active){background:#f3e5f5}
 .container{max-width:1200px;margin:0 auto;padding:20px}
 .layout{display:flex;gap:20px}
 .filter-panel{width:240px;flex-shrink:0;background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.1);align-self:flex-start;position:sticky;top:60px}
 .problem-list{flex:1;min-width:0}
-.toggle-group{display:flex;border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid #2E7D32}
-.toggle-btn{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:14px;background:#fff;color:#2E7D32;font-weight:600;border:none}
-.toggle-btn.active{background:#2E7D32;color:#fff}
+.toggle-group{display:flex;border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid #6A1B9A}
+.toggle-btn{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:14px;background:#fff;color:#6A1B9A;font-weight:600;border:none}
+.toggle-btn.active{background:#6A1B9A;color:#fff}
 .filter-btn{display:block;width:100%;padding:10px 12px;margin-bottom:6px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;text-align:left;font-size:14px;transition:all .15s}
-.filter-btn.active{background:#2E7D32;color:#fff;border-color:#2E7D32}
-.filter-btn:hover:not(.active){background:#e8f5e9}
+.filter-btn.active{background:#6A1B9A;color:#fff;border-color:#6A1B9A}
+.filter-btn:hover:not(.active){background:#f3e5f5}
 .card{background:#fff;border-radius:8px;padding:16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;gap:12px;transition:box-shadow .15s}
 .card:hover{box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .card-meta{display:flex;gap:6px;flex-shrink:0}
-.card-meta span{font-size:12px;padding:3px 8px;border-radius:4px;background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap}
+.card-meta span{font-size:12px;padding:3px 8px;border-radius:4px;background:#f3e5f5;color:#6A1B9A;font-weight:600;white-space:nowrap}
 .card-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#555}
 .badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
 .badge-none{background:#eee;color:#999}
-.badge-done{background:#e8f5e9;color:#2E7D32}
+.badge-done{background:#f3e5f5;color:#6A1B9A}
 .badge-retry{background:#fff3e0;color:#e65100}
 .solve-view{background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
 .solve-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
 .btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;transition:all .15s}
 .btn-back{background:#eee;color:#555}
 .btn-back:hover{background:#ddd}
-.btn-green{background:#2E7D32;color:#fff}
-.btn-green:hover{background:#256b29}
+.btn-green{background:#6A1B9A;color:#fff}
+.btn-green:hover{background:#4a148c}
 .btn-orange{background:#e65100;color:#fff}
 .btn-orange:hover{background:#bf4400}
 .btn-gray{background:#9e9e9e;color:#fff}
@@ -45,9 +45,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .btn-red:hover{background:#a51d1d}
 .problem-text{font-size:17px;line-height:1.8;white-space:pre-wrap;background:#fafafa;padding:20px;border-radius:8px;border:1px solid #eee;margin-bottom:20px}
 .memo-area{width:100%;min-height:120px;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;resize:vertical;font-family:inherit;line-height:1.6}
-.answer-box{background:#e8f5e9;padding:20px;border-radius:8px;margin:16px 0;white-space:pre-wrap;line-height:1.7;font-size:16px;border-left:4px solid #2E7D32}
+.answer-box{background:#f3e5f5;padding:20px;border-radius:8px;margin:16px 0;white-space:pre-wrap;line-height:1.7;font-size:16px;border-left:4px solid #6A1B9A}
 .score-btns{display:flex;gap:10px;margin:20px 0;flex-wrap:wrap}
-.section-title{font-size:18px;font-weight:700;color:#2E7D32;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid #e8f5e9}
+.section-title{font-size:18px;font-weight:700;color:#6A1B9A;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid #f3e5f5}
 .form-group{margin-bottom:16px}
 .form-group label{display:block;font-weight:600;margin-bottom:6px;color:#555}
 .form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:15px;font-family:inherit}
@@ -124,7 +124,7 @@ function renderSolve(el){
 const q=getQ(solvingId);if(!q){solvingId=null;renderBrowse();return}
 const list=solveFrom==='browse'?filtered():data.filter(x=>x.status==='retry');
 const idx=list.findIndex(x=>x.id===q.id);const next=idx<list.length-1?list[idx+1]:null;
-let h=`<div class="solve-view"><div class="solve-header"><button class="btn btn-back" onclick="solvingId=null;${solveFrom==='browse'?'renderBrowse()':'switchTab(\\\'wrong\\\')'}">← 목록으로</button><span style="font-weight:700;color:#2E7D32">${q.year}년 · ${q.unit} · ${q.num}번</span></div>`;
+let h=`<div class="solve-view"><div class="solve-header"><button class="btn btn-back" onclick="solvingId=null;${solveFrom==='browse'?'renderBrowse()':'switchTab(\\\'wrong\\\')'}">← 목록으로</button><span style="font-weight:700;color:#6A1B9A">${q.year}년 · ${q.unit} · ${q.num}번</span></div>`;
 h+=`<div class="problem-text">${esc(q.text)}</div>`;
 h+=`<div class="form-group"><label>내 답안 메모</label><textarea class="memo-area" oninput="saveMemo('${q.id}',this.value)">${esc(q.memo)}</textarea></div>`;
 h+=`<button class="btn btn-green" onclick="toggleAnswer()" id="ans-toggle">정답·해설 보기 ▼</button>`;
