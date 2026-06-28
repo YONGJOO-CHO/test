@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>생명과학 임용기출 학습기</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#F8F9FA;color:#333;font-size:16px;min-height:100vh}
+.tabs{display:flex;background:#fff;border-bottom:2px solid #2E7D32;position:sticky;top:0;z-index:100}
+.tab{flex:1;padding:14px;text-align:center;cursor:pointer;font-weight:600;color:#666;transition:all .2s}
+.tab.active{color:#fff;background:#2E7D32}
+.tab:hover:not(.active){background:#e8f5e9}
+.container{max-width:1200px;margin:0 auto;padding:20px}
+.layout{display:flex;gap:20px}
+.filter-panel{width:240px;flex-shrink:0;background:#fff;border-radius:8px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.1);align-self:flex-start;position:sticky;top:60px}
+.problem-list{flex:1;min-width:0}
+.toggle-group{display:flex;border-radius:6px;overflow:hidden;margin-bottom:16px;border:1px solid #2E7D32}
+.toggle-btn{flex:1;padding:8px;text-align:center;cursor:pointer;font-size:14px;background:#fff;color:#2E7D32;font-weight:600;border:none}
+.toggle-btn.active{background:#2E7D32;color:#fff}
+.filter-btn{display:block;width:100%;padding:10px 12px;margin-bottom:6px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;text-align:left;font-size:14px;transition:all .15s}
+.filter-btn.active{background:#2E7D32;color:#fff;border-color:#2E7D32}
+.filter-btn:hover:not(.active){background:#e8f5e9}
+.card{background:#fff;border-radius:8px;padding:16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;gap:12px;transition:box-shadow .15s}
+.card:hover{box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.card-meta{display:flex;gap:6px;flex-shrink:0}
+.card-meta span{font-size:12px;padding:3px 8px;border-radius:4px;background:#e8f5e9;color:#2E7D32;font-weight:600;white-space:nowrap}
+.card-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#555}
+.badge{padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;white-space:nowrap}
+.badge-none{background:#eee;color:#999}
+.badge-done{background:#e8f5e9;color:#2E7D32}
+.badge-retry{background:#fff3e0;color:#e65100}
+.solve-view{background:#fff;border-radius:8px;padding:24px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.solve-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.btn{padding:8px 16px;border:none;border-radius:6px;cursor:pointer;font-size:14px;font-weight:600;transition:all .15s}
+.btn-back{background:#eee;color:#555}
+.btn-back:hover{background:#ddd}
+.btn-green{background:#2E7D32;color:#fff}
+.btn-green:hover{background:#256b29}
+.btn-orange{background:#e65100;color:#fff}
+.btn-orange:hover{background:#bf4400}
+.btn-gray{background:#9e9e9e;color:#fff}
+.btn-gray:hover{background:#757575}
+.btn-red{background:#c62828;color:#fff}
+.btn-red:hover{background:#a51d1d}
+.problem-text{font-size:17px;line-height:1.8;white-space:pre-wrap;background:#fafafa;padding:20px;border-radius:8px;border:1px solid #eee;margin-bottom:20px}
+.memo-area{width:100%;min-height:120px;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;resize:vertical;font-family:inherit;line-height:1.6}
+.answer-box{background:#e8f5e9;padding:20px;border-radius:8px;margin:16px 0;white-space:pre-wrap;line-height:1.7;font-size:16px;border-left:4px solid #2E7D32}
+.score-btns{display:flex;gap:10px;margin:20px 0;flex-wrap:wrap}
+.section-title{font-size:18px;font-weight:700;color:#2E7D32;margin:20px 0 12px;padding-bottom:8px;border-bottom:2px solid #e8f5e9}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-weight:600;margin-bottom:6px;color:#555}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:6px;font-size:15px;font-family:inherit}
+.form-group textarea{min-height:120px;resize:vertical;line-height:1.6}
+.manage-item{display:flex;align-items:center;gap:10px;padding:12px;background:#fff;border-radius:8px;margin-bottom:8px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.manage-item .info{flex:1;min-width:0}
+.manage-item .info span{font-size:13px;color:#888}
+.empty-msg{text-align:center;padding:40px;color:#999}
+.count-badge{font-size:13px;background:#fff3e0;color:#e65100;padding:2px 8px;border-radius:10px;margin-left:8px}
+.hidden{display:none}
+@media(max-width:768px){
+.layout{flex-direction:column}
+.filter-panel{width:100%;position:static}
+.score-btns{flex-direction:column}
+.tabs{font-size:14px}
+.tab{padding:10px 6px}
+}
+</style>
+</head>
+<body>
+<div class="tabs">
+<div class="tab active" onclick="switchTab('browse')">문제 탐색</div>
+<div class="tab" onclick="switchTab('wrong')">오답 노트</div>
+<div class="tab" onclick="switchTab('manage')">문제 관리</div>
+</div>
+<div class="container">
+<div id="view-browse"></div>
+<div id="view-wrong" class="hidden"></div>
+<div id="view-manage" class="hidden"></div>
+</div>
+<script>
+const STORAGE_KEY='biosci_exam_data';
+const UNITS=['세포생물학','유전학','생리학','생태학','진화','분류학','생화학','기타'];
+const SAMPLE=[
+{id:crypto.randomUUID(),year:2022,unit:'세포생물학',num:1,text:'다음은 세포 소기관의 특징에 대한 설명이다. (가)~(다)에 해당하는 소기관의 이름을 쓰고, 각 소기관이 막으로 둘러싸여 있는지 여부를 서술하시오.\n\n(가) 이 소기관은 자체 DNA를 가지고 있으며, 산화적 인산화를 통해 ATP를 생성한다.\n(나) 이 소기관은 rRNA와 단백질로 구성되어 있으며, mRNA의 코돈을 읽어 폴리펩타이드를 합성한다.\n(다) 이 소기관은 소포체에서 전달된 단백질을 변형·분류하여 세포 내외로 수송하는 역할을 한다.',answer:'(가) 미토콘드리아 - 2중막으로 둘러싸여 있음 (외막, 내막)\n(나) 리보솜 - 막으로 둘러싸여 있지 않음\n(다) 골지체(골지장치) - 1중막으로 둘러싸여 있음',status:'none',memo:''},
+{id:crypto.randomUUID(),year:2021,unit:'유전학',num:3,text:'멘델의 독립의 법칙이 성립하지 않는 경우를 연관(linkage)이라 한다. 연관된 두 유전자의 재조합 빈도를 측정하는 방법을 설명하고, 재조합 빈도가 50%에 가까울 때 나타나는 현상을 서술하시오.\n\n(1) 재조합 빈도를 측정하기 위한 교배 방법의 이름과 그 원리를 서술하시오.\n(2) 재조합 빈도가 50%에 가까운 경우, 두 유전자의 유전 양상이 어떻게 나타나는지 설명하시오.',answer:'(1) 검정교배(test cross)를 이용한다. 이형접합체(AaBb)와 열성 동형접합체(aabb)를 교배하여 자손의 표현형 비율로부터 재조합형과 부모형의 비율을 구한다. 재조합 빈도 = (재조합형 자손 수 / 전체 자손 수) × 100%\n\n(2) 재조합 빈도가 50%에 가까우면 두 유전자가 같은 염색체 위에 있더라도 거리가 매우 멀어 교차가 빈번하게 일어나므로, 표현형 비율이 독립 유전(9:3:3:1)과 거의 동일하게 나타난다.',status:'none',memo:''},
+{id:crypto.randomUUID(),year:2020,unit:'생태학',num:5,text:'생태계의 물질 순환 중 질소 순환의 주요 과정 4가지(질소 고정, 질화, 동화, 탈질소)를 각각 설명하고, 관여하는 생물의 예를 드시오.\n\n각 과정에 대해 다음을 포함하여 서술할 것:\n① 화학 반응의 기질과 생성물\n② 관여하는 대표 생물\n③ 해당 과정의 생태적 의의',answer:'① 질소 고정: 대기 중 N₂를 NH₄⁺(암모늄)으로 전환. 뿌리혹박테리아(Rhizobium), 남세균(Anabaena) 등이 나이트로게네이스 효소를 이용하여 수행. 생물이 이용 가능한 질소 화합물을 공급.\n\n② 질화(질산화): NH₄⁺ → NO₂⁻ → NO₃⁻. Nitrosomonas가 NH₄⁺를 NO₂⁻로, Nitrobacter가 NO₂⁻를 NO₃⁻로 산화. 식물이 흡수하기 쉬운 NO₃⁻ 형태로 전환.\n\n③ 동화: 식물이 NO₃⁻를 뿌리를 통해 흡수한 후 아미노산, 핵산 등 유기 질소 화합물로 합성. 질소가 먹이사슬을 통해 소비자에게 전달.\n\n④ 탈질소(탈질산화): NO₃⁻ → N₂. Pseudomonas 등 혐기성 세균이 수행. 토양의 과잉 질소를 대기로 되돌려 질소 순환을 완성.',status:'none',memo:''}
+];
+
+let data=[];
+let currentTab='browse';
+let filterMode='year';
+let selectedFilter=null;
+let solvingId=null;
+let solveFrom='browse';
+
+function load(){const s=localStorage.getItem(STORAGE_KEY);if(s){data=JSON.parse(s)}else{data=SAMPLE;save()}}
+function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(data))}
+function getQ(id){return data.find(q=>q.id===id)}
+function switchTab(t){currentTab=t;document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['browse','wrong','manage'][i]===t));document.getElementById('view-browse').classList.toggle('hidden',t!=='browse');document.getElementById('view-wrong').classList.toggle('hidden',t!=='wrong');document.getElementById('view-manage').classList.toggle('hidden',t!=='manage');solvingId=null;if(t==='browse')renderBrowse();else if(t==='wrong')renderWrong();else renderManage()}
+function years(){return[...new Set(data.map(q=>q.year))].sort((a,b)=>a-b)}
+function filtered(){if(!selectedFilter)return[];if(filterMode==='year')return data.filter(q=>q.year===selectedFilter).sort((a,b)=>a.num-b.num);return data.filter(q=>q.unit===selectedFilter).sort((a,b)=>b.year-a.year||a.num-b.num)}
+function badgeHTML(s){if(s==='done')return'<span class="badge badge-done">✓ 완료</span>';if(s==='retry')return'<span class="badge badge-retry">△ 재풀기</span>';return'<span class="badge badge-none">○ 미풀이</span>'}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function preview(s,n=50){const l=s.split('\n')[0];return l.length>n?l.slice(0,n)+'…':l}
+
+function renderBrowse(){
+const el=document.getElementById('view-browse');
+if(solvingId){renderSolve(el);return}
+const yrs=years();const unitsUsed=[...new Set(data.map(q=>q.unit))];
+if(!selectedFilter){if(filterMode==='year'&&yrs.length)selectedFilter=yrs[0];else if(filterMode==='unit'&&unitsUsed.length)selectedFilter=UNITS.find(u=>unitsUsed.includes(u))||unitsUsed[0]}
+const items=filtered();
+let h=`<div class="layout"><div class="filter-panel"><div class="toggle-group"><button class="toggle-btn ${filterMode==='year'?'active':''}" onclick="filterMode='year';selectedFilter=null;renderBrowse()">연도별 보기</button><button class="toggle-btn ${filterMode==='unit'?'active':''}" onclick="filterMode='unit';selectedFilter=null;renderBrowse()">단원별 보기</button></div>`;
+if(filterMode==='year'){yrs.forEach(y=>{h+=`<button class="filter-btn ${selectedFilter===y?'active':''}" onclick="selectedFilter=${y};renderBrowse()">${y}년</button>`})}
+else{UNITS.forEach(u=>{if(data.some(q=>q.unit===u))h+=`<button class="filter-btn ${selectedFilter===u?'active':''}" onclick="selectedFilter='${u}';renderBrowse()">${u}</button>`})}
+h+=`</div><div class="problem-list">`;
+if(!items.length)h+=`<div class="empty-msg">문제가 없습니다.</div>`;
+items.forEach(q=>{h+=`<div class="card" onclick="solveFrom='browse';solvingId='${q.id}';renderBrowse()"><div class="card-meta"><span>${q.year}</span><span>${q.unit}</span><span>${q.num}번</span></div><div class="card-title">${esc(preview(q.text))}</div>${badgeHTML(q.status)}</div>`});
+h+=`</div></div>`;
+el.innerHTML=h;
+}
+
+function renderSolve(el){
+const q=getQ(solvingId);if(!q){solvingId=null;renderBrowse();return}
+const list=solveFrom==='browse'?filtered():data.filter(x=>x.status==='retry');
+const idx=list.findIndex(x=>x.id===q.id);const next=idx<list.length-1?list[idx+1]:null;
+let h=`<div class="solve-view"><div class="solve-header"><button class="btn btn-back" onclick="solvingId=null;${solveFrom==='browse'?'renderBrowse()':'switchTab(\\\'wrong\\\')'}">← 목록으로</button><span style="font-weight:700;color:#2E7D32">${q.year}년 · ${q.unit} · ${q.num}번</span></div>`;
+h+=`<div class="problem-text">${esc(q.text)}</div>`;
+h+=`<div class="form-group"><label>내 답안 메모</label><textarea class="memo-area" oninput="saveMemo('${q.id}',this.value)">${esc(q.memo)}</textarea></div>`;
+h+=`<button class="btn btn-green" onclick="toggleAnswer()" id="ans-toggle">정답·해설 보기 ▼</button>`;
+h+=`<div class="answer-box hidden" id="ans-box">${esc(q.answer)}</div>`;
+h+=`<div class="score-btns"><button class="btn btn-green" onclick="setStatus('${q.id}','done')">✓ 완료 (정답)</button><button class="btn btn-orange" onclick="setStatus('${q.id}','retry')">△ 재풀기 필요</button><button class="btn btn-gray" onclick="setStatus('${q.id}','none')">○ 미풀이로 초기화</button></div>`;
+if(next)h+=`<button class="btn btn-green" onclick="solvingId='${next.id}';${solveFrom==='browse'?'renderBrowse()':'renderWrong()'}">다음 문제 →</button>`;
+h+=`</div>`;
+el.innerHTML=h;
+}
+function toggleAnswer(){const b=document.getElementById('ans-box');const t=document.getElementById('ans-toggle');b.classList.toggle('hidden');t.textContent=b.classList.contains('hidden')?'정답·해설 보기 ▼':'정답·해설 접기 ▲'}
+function saveMemo(id,v){const q=getQ(id);if(q){q.memo=v;save()}}
+function setStatus(id,s){const q=getQ(id);if(q){q.status=s;save();if(solveFrom==='browse')renderBrowse();else renderWrong()}}
+
+function renderWrong(){
+const el=document.getElementById('view-wrong');
+if(solvingId){renderSolveWrong();return}
+const retries=data.filter(q=>q.status==='retry');
+let h='';
+if(!retries.length){el.innerHTML='<div class="empty-msg">재풀기 필요한 문제가 없습니다. 👍</div>';return}
+const grouped={};retries.forEach(q=>{(grouped[q.unit]=grouped[q.unit]||[]).push(q)});
+UNITS.forEach(u=>{if(!grouped[u])return;h+=`<div class="section-title">${u} <span class="count-badge">${grouped[u].length}문제</span></div>`;grouped[u].sort((a,b)=>b.year-a.year||a.num-b.num).forEach(q=>{h+=`<div class="card" onclick="solveFrom='wrong';solvingId='${q.id}';renderWrong()"><div class="card-meta"><span>${q.year}</span><span>${q.num}번</span></div><div class="card-title">${esc(preview(q.text))}</div>${badgeHTML(q.status)}</div>`})});
+el.innerHTML=h;
+}
+function renderSolveWrong(){renderSolve(document.getElementById('view-wrong'))}
+
+let editingId=null;let showForm=false;
+function renderManage(){
+const el=document.getElementById('view-manage');
+let h='<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px"><button class="btn btn-green" onclick="showForm=!showForm;editingId=null;renderManage()">+ 새 문제 추가</button><button class="btn btn-back" onclick="exportData()">전체 데이터 내보내기</button><label class="btn btn-back" style="cursor:pointer">데이터 불러오기<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label></div>';
+if(showForm||editingId){
+const q=editingId?getQ(editingId):null;
+h+=`<div class="solve-view" style="margin-bottom:20px"><div class="section-title">${q?'문제 수정':'새 문제 추가'}</div>`;
+h+=`<div class="form-group"><label>연도</label><input type="number" id="f-year" value="${q?q.year:2024}" min="2000" max="2099"></div>`;
+h+=`<div class="form-group"><label>단원</label><select id="f-unit">${UNITS.map(u=>`<option ${q&&q.unit===u?'selected':''}>${u}</option>`).join('')}</select></div>`;
+h+=`<div class="form-group"><label>문제 번호</label><input type="number" id="f-num" value="${q?q.num:1}" min="1"></div>`;
+h+=`<div class="form-group"><label>문제 전문</label><textarea id="f-text">${q?esc(q.text):''}</textarea></div>`;
+h+=`<div class="form-group"><label>정답·해설</label><textarea id="f-answer">${q?esc(q.answer):''}</textarea></div>`;
+h+=`<div style="display:flex;gap:10px"><button class="btn btn-green" onclick="saveQuestion()">저장</button><button class="btn btn-back" onclick="showForm=false;editingId=null;renderManage()">취소</button></div></div>`;
+}
+const sorted=[...data].sort((a,b)=>b.year-a.year||a.num-b.num);
+sorted.forEach(q=>{h+=`<div class="manage-item"><div class="info"><strong>${q.year}년 ${q.unit} ${q.num}번</strong><br><span>${esc(preview(q.text,60))}</span></div><button class="btn btn-back" onclick="editingId='${q.id}';showForm=false;renderManage()">수정</button><button class="btn btn-red" onclick="deleteQ('${q.id}')">삭제</button></div>`});
+el.innerHTML=h;
+}
+function saveQuestion(){
+const year=parseInt(document.getElementById('f-year').value);const unit=document.getElementById('f-unit').value;const num=parseInt(document.getElementById('f-num').value);const text=document.getElementById('f-text').value.trim();const answer=document.getElementById('f-answer').value.trim();
+if(!year||!text){alert('연도와 문제 전문은 필수입니다.');return}
+if(editingId){const q=getQ(editingId);Object.assign(q,{year,unit,num,text,answer})}
+else{data.push({id:crypto.randomUUID(),year,unit,num,text,answer,status:'none',memo:''})}
+save();showForm=false;editingId=null;renderManage();
+}
+function deleteQ(id){if(!confirm('정말 삭제하시겠습니까?'))return;data=data.filter(q=>q.id!==id);save();renderManage()}
+function exportData(){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='biosci_exam_data.json';a.click();URL.revokeObjectURL(a.href)}
+function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(!Array.isArray(d)){alert('잘못된 형식입니다.');return}d.forEach(q=>{if(!q.id)q.id=crypto.randomUUID();if(!q.status)q.status='none';if(!q.memo)q.memo=''});data=data.concat(d);save();renderManage();alert(d.length+'개 문제를 불러왔습니다.')}catch{alert('JSON 파싱 오류')}};r.readAsText(f)}
+
+load();renderBrowse();
+</script>
+</body>
+</html>
